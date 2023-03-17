@@ -1,0 +1,56 @@
+/* Default styles */
+img {
+    max-width: 500px;
+    height: auto;
+}
+h2 {
+    text-align: center;
+}
+.graph {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+.bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    margin-right: 5px;
+}
+.bar-fill {
+    background-color: #2196F3;
+    border-radius: 5px;
+    height: 200px;
+    width: 50px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    transition: all 0.3s ease-in-out;
+}
+.bar-text {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Media queries for responsive design */
+@media only screen and (max-width: 600px) {
+    img {
+        max-width: 100%;
+    }
+    .graph {
+        flex-wrap: wrap;
+    }
+    .bar {
+        margin-bottom: 10px;
+    }
+    .bar-fill {
+        height: 100px;
+        width: 25px;
+    }
+    .bar-text {
+        font-size: 10px;
+    }
+}

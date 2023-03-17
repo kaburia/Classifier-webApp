@@ -4,6 +4,8 @@ from torchvision import transforms, models
 import torch
 import torch.nn as nn
 import io
+import uuid
+import os
 
 # Use GPU if it's available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -32,44 +34,72 @@ model.to(device);
 
 app = Flask(__name__)
 
+UPLOAD_FOLDER = os.path.abspath('static')
+
+# model = torch.hub.load("ultralytics/yolov5", 'yolov5m.pt')
+
+app.secret_key = "secret key"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 # Define a route for the homepage
 @app.route('/')
 def home():
-    return render_template('classify.html')
+    return render_template('index.html')
 
 # Define a route for image classification
-@app.route('/classify', methods=['POST'])
+# @app.route('/classify', methods=['POST'])
+# Define a route for image classification
+@app.route('/classify', methods=['GET', 'POST'])
 def classify():
-    # Get the image file from the request
-    img = request.files['file'].read()
-    
-    # Load the image using PIL
-    img = Image.open(io.BytesIO(img)).convert('RGB')
-    
-    # Preprocess the image
-    preprocess = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    img_tensor = preprocess(img)
-    img_tensor = img_tensor.unsqueeze(0)
-    
-    # Make a prediction using the model
-    with torch.no_grad():
-        output = model(img_tensor.to(device))
-        ps = torch.exp(output)
-        top_p, top_class = ps.topk(1, dim=1)
-        class_index = top_class.cpu().numpy()[0][0]
-        prob = top_p.cpu().numpy()[0][0]
-    
-    # Return the predicted class and probabilities
-    if class_index == 0:
-        result = 'Real'
+    if request.method == 'POST':
+        # Get the image file from the request
+        img = request.files['file'].read()
+
+        # Load the image using PIL
+        img = Image.open(io.BytesIO(img)).convert('RGB')
+
+        # Preprocess the image
+        preprocess = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+        img_tensor = preprocess(img)
+        img_tensor = img_tensor.unsqueeze(0)
+
+        # Make a prediction using the model
+        with torch.no_grad():
+            output = model(img_tensor.to(device))
+            ps = torch.exp(output)
+            top_p, top_class = ps.topk(1, dim=1)
+            class_index = top_class.cpu().numpy()[0][0]
+            prob = top_p.cpu().numpy()[0][0]
+
+        # Return the predicted class and probabilities
+        if class_index == 0:
+            result = 'Real'
+            probability_real = round(float(prob) * 100, 2)
+            probability_fake = round(100 - probability_real, 2)
+        else:
+            result = 'Fake'
+            probability_fake = round(float(prob) * 100, 2)
+            probability_real = round(100 - probability_fake, 2)
+
+        # Save the image with a unique filename
+        filename = str(uuid.uuid4()) + '.jpg'
+        file_path = f"{UPLOAD_FOLDER}\{filename}"
+        # print(img.show())
+        img.save(file_path, format='JPEG')
+        print("File saved at path:", file_path)
+
+        # Render the classify.html template with the prediction results
+        return render_template('classify.html', file_path=filename, prediction=result,
+                               probability_real=probability_real, probability_fake=probability_fake)
     else:
-        result = 'Fake'
-    return jsonify({'result': result, 'probability': prob})
+        return render_template('classify.html')
+
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5500)

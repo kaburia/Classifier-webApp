@@ -15,7 +15,7 @@
         </form>
         {% if file_path %}
             <h3>Uploaded Image:</h3>
-            <img src="{{ file_path }}">
+            <img src="{{ url_for('static', filename=file_path) }}">
             {% if prediction %}
                 <h3>Prediction:</h3>
                 <div class="graph">

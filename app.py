@@ -25,12 +25,16 @@ model.classifier = nn.Sequential(nn.Linear(1024, 512),
                                  nn.Linear(256,2),
                                  nn.LogSoftmax(dim=1))
 
-criterion = nn.NLLLoss()
+# criterion = nn.NLLLoss()
 
 # Only train the classifier parameters, feature parameters are frozen
 # optimizer = optim.Adam(model.classifier.parameters(), lr=0.003)
 
 model.to(device);
+
+
+state = torch.load('checkpoint.pth', map_location=torch.device('cpu'))
+model.load_state_dict(state)
 
 app = Flask(__name__)
 
@@ -70,11 +74,12 @@ def classify():
 
         # Make a prediction using the model
         with torch.no_grad():
-            output = model(img_tensor.to(device))
-            ps = torch.exp(output)
-            top_p, top_class = ps.topk(1, dim=1)
-            class_index = top_class.cpu().numpy()[0][0]
-            prob = top_p.cpu().numpy()[0][0]
+            model.eval()
+            output = model.forward(img_tensor.to(device))
+        ps = torch.exp(output)
+        top_p, top_class = ps.topk(1, dim=1)
+        class_index = top_class.cpu().numpy()[0][0]
+        prob = top_p.cpu().numpy()[0][0]
 
         # Return the predicted class and probabilities
         if class_index == 0:

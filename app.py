@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, redirect, url_for
 from PIL import Image
 from torchvision import transforms, models
 import torch
@@ -48,7 +48,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Define a route for the homepage
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return redirect(url_for('classify'))
 
 # Define a route for image classification
 # @app.route('/classify', methods=['POST'])

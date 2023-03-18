@@ -4,3 +4,13 @@ This repository contains code for a web application that performs image classifi
 
 
 ![image](https://user-images.githubusercontent.com/88529649/226077466-b50a2c33-7f38-4b21-87a6-9b25709b6a3d.png)
+
+```
+git clone
+cd Classifier-webApp
+python -m virtualenv webApp
+.\webApp\Source\activate
+pip install -r requirements.txt
+python app.py
+```
+

@@ -82,7 +82,7 @@ def classify():
         prob = top_p.cpu().numpy()[0][0]
 
         # Return the predicted class and probabilities
-        if class_index == 0:
+        if class_index != 0:
             result = 'Real'
             probability_real = round(float(prob) * 100, 2)
             probability_fake = round(100 - probability_real, 2)

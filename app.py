@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for
+from flask import Flask, jsonify, request, render_template, redirect, url_for, jsonify
 from PIL import Image
 from torchvision import transforms, models
 import torch
@@ -93,18 +93,27 @@ def classify():
 
         # Save the image with a unique filename
         filename = str(uuid.uuid4()) + '.jpg'
-        file_path = f"{UPLOAD_FOLDER}\{filename}"
-        # print(img.show())
-        img.save(file_path, format='JPEG')
-        print("File saved at path:", file_path)
+        # file_path = f"{UPLOAD_FOLDER}\{filename}"
+        # # print(img.show())
+        # img.save(file_path, format='JPEG')
+        # print("File saved at path:", file_path)
 
         # Render the classify.html template with the prediction results
-        return render_template('classify.html', file_path=filename, prediction=result,
-                               probability_real=probability_real, probability_fake=probability_fake)
-    else:
-        return render_template('classify.html')
+        # return render_template('classify.html', file_path=filename, prediction=result,
+                            #    probability_real=probability_real, probability_fake=probability_fake)
+        return jsonify({'result': result, 
+                        'probability_real': probability_real, 
+                        'probability_fake': probability_fake})
+    
+    # else:
+    #     return render_template('classify.html')
 
-
+# Define a route for the API endpoint that returns the model's class names
+@app.route('/api/classnames', methods=['POST'])
+def classnames():
+    # Replace this with your own list of class names
+    class_names = ['Real', 'Fake']
+    return jsonify(class_names)
 
 if __name__ == '__main__':
-    app.run(port=5500)
+    app.run(host='0.0.0.0', port=5500)
